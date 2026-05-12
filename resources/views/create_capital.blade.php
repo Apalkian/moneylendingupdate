@@ -69,11 +69,5 @@
             </div>
         </div>
 
-        <!-- Logic Alert -->
-        <div class="alert alert-warning mt-3 shadow-sm">
-            <i class="bi bi-exclamation-triangle"></i> 
-            <strong>Note:</strong> Capital can only be added to <strong>Active</strong> loans. The system will reject entries for 'Completed' loans.
-        </div>
-    </div>
-</div>
+     
 @endsection

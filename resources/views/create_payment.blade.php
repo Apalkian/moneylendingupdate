@@ -18,14 +18,35 @@
                         <select name="loan_id" class="form-select" required>
                             <option value="" selected disabled>-- Choose a Loan --</option>
                             @foreach($loans as $loan)
-                                <option value="{{ $loan->loan_id }}">
-                                    ID: {{ $loan->loan_id }} | 
-                                    Borrower: {{ $loan->borrower->last_name }}, {{ $loan->borrower->first_name }} | 
-                                    Original Principal: PHP {{ number_format($loan->principal_amount, 2) }}
+                                @php
+                                    $principal = (float) $loan->principal_amount;
+                                    $interestDue = $principal * ((float) $loan->interest_rate / 100);
+                                    $totalPrincipalInterest = $principal + $interestDue;
+
+                                    $totalPaid = (float) \App\Models\Payment::where('loan_id', $loan->loan_id)->sum('amount_paid');
+                                    $remainingTotal = $totalPrincipalInterest - $totalPaid;
+                                    if ($remainingTotal < 0) { $remainingTotal = 0; }
+                                @endphp
+                                <option
+                                    value="{{ $loan->loan_id }}"
+                                    data-due-date="{{ $loan->due_date }}"
+                                    data-total-to-pay="{{ number_format($remainingTotal, 2, '.', '') }}">
+                                    ID: {{ $loan->loan_id }} |
+                                    Borrower: {{ $loan->borrower->last_name }}, {{ $loan->borrower->first_name }} |
+                                    Due: {{ $loan->due_date }} |
+                                    Total to Pay: PHP {{ number_format($remainingTotal, 2) }}
                                 </option>
                             @endforeach
                         </select>
                         <div class="form-text text-muted">Only loans with "Active" status are shown here.</div>
+
+                        <div class="mt-3">
+                            <label class="form-label fw-bold">Due Date (Monthly)</label>
+                            <div class="border rounded p-2 bg-light">
+                                <div id="due_date_text" class="fw-bold">Due Date: —</div>
+                                <div id="total_to_pay_text" class="fw-bold">Total to Pay: —</div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -56,9 +77,27 @@
             </div>
         </div>
         
-        <div class="alert alert-info mt-3 shadow-sm">
-            <strong>Note:</strong> The system will automatically calculate the interest added and update the Loan Status to <strong>'Completed'</strong> if the full balance is paid.
-        </div>
-    </div>
-</div>
+       
+
+<script>
+(function () {
+    const select = document.querySelector('select[name="loan_id"]');
+    const dueText = document.getElementById('due_date_text');
+    const totalText = document.getElementById('total_to_pay_text');
+
+    if (!select || !dueText || !totalText) return;
+
+    function sync() {
+        const opt = select.options[select.selectedIndex];
+        const due = opt?.dataset?.dueDate;
+        const total = opt?.dataset?.totalToPay;
+
+        dueText.textContent = due ? ('Due Date: ' + due) : 'Due Date: —';
+        totalText.textContent = total ? ('Total to Pay: PHP ' + Number(total).toFixed(2)) : 'Total to Pay: —';
+    }
+
+    select.addEventListener('change', sync);
+    sync();
+})();
+</script>
 @endsection

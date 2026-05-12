@@ -12,14 +12,14 @@ return new class extends Migration
     public function up(): void
     {
        Schema::create('loan_table', function (Blueprint $table) {
-            $table->id('loan_id'); // #1 loan_id
-            $table->unsignedBigInteger('borrower_id'); // #2 borrower_id (Foreign Key)
-            $table->decimal('principal_amount', 15, 2); // #3
-            $table->decimal('interest_rate', 5, 2); // #4
-            $table->date('release_date'); // #5
-            $table->date('due_date'); // #6
-            $table->string('status', 20)->default('Active'); // #7 (Default: Active)
-            $table->unsignedBigInteger('admin_id')->nullable(); // #8 admin_id (Foreign Key)
+            $table->id('loan_id'); 
+            $table->unsignedBigInteger('borrower_id'); 
+            $table->decimal('principal_amount', 15, 2);
+            $table->decimal('interest_rate', 5, 2); 
+            $table->date('release_date'); 
+            $table->date('due_date'); 
+            $table->string('status', 20)->default('Active'); 
+            $table->unsignedBigInteger('admin_id')->nullable(); 
             
             // Defining Relationships
             $table->foreign('borrower_id')->references('borrower_id')->on('borrower_table')->onDelete('cascade');
@@ -34,7 +34,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // FIXED: Changed 'loans' to 'loan_table'
+       
         Schema::dropIfExists('loan_table');
     }
 };

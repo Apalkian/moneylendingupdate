@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Models\Payment;
 use App\Models\Loan;
-use App\Models\AdditionalCapital; // IMPORTANT: Make sure this matches your Model name
+use App\Models\AdditionalCapital; 
 
 class PaymentObserver
 {
@@ -43,16 +43,16 @@ class PaymentObserver
         // 1. Calculate total paid
         $totalPaid = Payment::where('loan_id', $loanId)->sum('amount_paid');
 
-        // 2. Calculate total additional capital/penalties
+        // 2. Calculate total additional capital
         $totalCapital = AdditionalCapital::where('loan_id', $loanId)->sum('amount_added');
 
-        // 3. Compare Total Due vs Total Paid
+        // 3. Compare Total Due  Total Paid
         $totalDue = $loan->principal_amount + $totalCapital;
 
         if ($totalPaid >= $totalDue) {
             $loan->update(['status' => 'Completed']);
         } else {
-            // If they deleted a payment and it's no longer fully paid, set back to Active
+            // If they deleted a payment and it's no longer fully paid set back to Active
             $loan->update(['status' => 'Active']);
         }
     }

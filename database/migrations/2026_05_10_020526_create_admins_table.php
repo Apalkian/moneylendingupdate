@@ -12,12 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('admin_table', function (Blueprint $table) {
-            $table->id('admin_id'); // Matches Image #2
-            // Added unique() to username to prevent duplicate accounts
+            $table->id('admin_id'); 
             $table->string('username', 50)->unique(); 
             $table->string('password', 255);
             $table->string('first_name', 50);
-            $table->string('middle_name', 50)->nullable(); // Matches 'Null: Yes'
+            $table->string('middle_name', 50)->nullable();
             $table->string('last_name', 50);
             $table->timestamps();
         });
@@ -28,7 +27,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // FIXED: Must match the table name in the up() method
+     
         Schema::dropIfExists('admin_table');
     }
 };

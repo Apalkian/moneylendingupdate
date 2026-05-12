@@ -12,10 +12,10 @@ class Loan extends Model
     protected $table = 'loan_table';
     protected $primaryKey = 'loan_id';
 
-    // Set to false if your loan_table does NOT have created_at/updated_at columns
+   
     public $timestamps = true; 
 
-    // Explicitly listing fields is safer than using $guarded = []
+
     protected $fillable = [
         'borrower_id', 
         'principal_amount', 
@@ -35,9 +35,9 @@ class Loan extends Model
         return $this->belongsTo(Borrower::class, 'borrower_id', 'borrower_id');
     }
 
-    /**
-     * Relationship: A Loan can have many Payments.
-     */
+
+    //Relationship A Loan can have many Payments.
+   
     public function payments()
     {
         return $this->hasMany(Payment::class, 'loan_id', 'loan_id');

@@ -20,7 +20,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <div class="navbar-nav">
                     <a class="nav-link" href="/">Dashboard</a>
-                    <a class="nav-link" href="/borrowers/">View Borrower</a>
+                    <a class="nav-link" href="/borrowers">View Borrower</a>
                     <a class="nav-link" href="/loans/create"> New Loan</a>
                     <a class="nav-link" href="/payments/create"> Post Payment</a>
                     <a class="nav-link" href="/additional-capital/create"> Add Capital</a>

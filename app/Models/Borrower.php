@@ -13,10 +13,9 @@ class Borrower extends Model
     protected $table = 'borrower_table';
     protected $primaryKey = 'borrower_id';
 
-    // Disable timestamps if your borrower_table doesn't have created_at/updated_at
     public $timestamps = true; 
 
-    // We removed $guarded and kept $fillable for better security
+
     protected $fillable = [
         'first_name', 
         'middle_name', 
@@ -32,17 +31,15 @@ class Borrower extends Model
         'admin_id'
     ];
 
-    /**
-     * Relationship: A Borrower can have many Loans.
-     */
+    // A Borrower can have many Loans.
+     
     public function loans()
     {
         return $this->hasMany(Loan::class, 'borrower_id', 'borrower_id');
     }
 
-    /**
-     * Relationship: A Borrower was registered by an Admin.
-     */
+        // A Borrower was registered by an Admin.
+     
     public function admin()
     {
         return $this->belongsTo(Admin::class, 'admin_id', 'admin_id');

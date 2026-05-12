@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB; // THIS WAS MISSING
+use Illuminate\Support\Facades\DB; 
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
     /**
-     * Get the Loan Report (Matches Image #7)
+     * Get the Loan Report
      */
     public function getLoanReport() 
     {
@@ -18,7 +18,7 @@ class ReportController extends Controller
     }
 
     /**
-     * Get Payment History (Matches Image #8 Top)
+     * Get Payment History
      */
     public function getPaymentHistory() 
     {
@@ -28,7 +28,7 @@ class ReportController extends Controller
     }
 
     /**
-     * Get Outstanding Balances (Matches Image #8 Bottom)
+     * Get Outstanding Balances 
      */
     public function getOutstandingBalances() 
     {

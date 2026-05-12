@@ -23,9 +23,8 @@ Route::middleware(['admin.auth'])->group(function () {
     Route::get('/', [WebController::class, 'index'])->name('dashboard');
 
     // Borrowers
-    Route::get('/borrowers', [WebController::class, 'showBorrowers']);
-    Route::get('/borrowers/create', [WebController::class, 'createBorrower']);
-    Route::post('/borrowers', [BorrowerController::class, 'store']);
+   // Replace your individual borrower routes with this one line:
+Route::resource('borrowers', BorrowerController::class);
 
     // Loans
     Route::resource('loans', LoanController::class);

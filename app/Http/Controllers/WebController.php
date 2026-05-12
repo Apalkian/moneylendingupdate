@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; // THIS WAS MISSING - ADDED
+use Illuminate\Support\Facades\DB;
 use App\Models\Borrower;
 use App\Models\Loan;
 
@@ -57,13 +57,18 @@ class WebController extends Controller
     /**
      * Show the form to record a payment
      */
-    public function createPayment() 
+    public function createPayment()
     {
-        // Added .with('borrower') so you can show names in the dropdown
+        // Show loans that still have remaining balance (from the SQL view),
+        // not only those with loan_table.status = 'Active'.
+        $loanIds = DB::table('vw_Outstanding_Balances')
+            ->where('Current_Balance', '>', 0)
+            ->pluck('loan_id');
+
         $loans = Loan::with('borrower')
-                     ->where('status', 'Active')
-                     ->get();
-                     
+            ->whereIn('loan_id', $loanIds)
+            ->get();
+
         return view('create_payment', compact('loans'));
     }
 }

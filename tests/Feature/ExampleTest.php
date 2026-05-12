@@ -12,7 +12,8 @@ class ExampleTest extends TestCase
      */
     public function test_the_application_returns_a_successful_response(): void
     {
-        $response = $this->get('/');
+        // Your AdminAuth middleware requires admin_id in session.
+        $response = $this->withSession(['admin_id' => 1])->get('/');
 
         $response->assertStatus(200);
     }

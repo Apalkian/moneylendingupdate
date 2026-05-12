@@ -14,7 +14,7 @@ class Admin extends Authenticatable
     protected $table = 'admin_table';
     protected $primaryKey = 'admin_id';
 
-    // Disable timestamps if your admin_table doesn't have created_at/updated_at
+   
     public $timestamps = true; 
 
     protected $fillable = [

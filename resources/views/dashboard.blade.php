@@ -47,6 +47,8 @@
                             <th>Rate %</th>
                             <th>Status</th>
                             <th>Release Date</th>
+                            <th>Due Date (Monthly)</th>
+                            <th>Total (Principal + Interest)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -62,6 +64,8 @@
                                 </span>
                             </td>
                             <td>{{ $row->release_date }}</td>
+                            <td>{{ $row->due_date }}</td>
+                            <td>PHP {{ number_format($row->total_to_pay, 2) }}</td>
                         </tr>
                         @endforeach
                     </tbody>

@@ -12,7 +12,7 @@ class AdditionalCapital extends Model
     protected $table = 'additional_table';
     protected $primaryKey = 'capital_id';
 
-    // Set this to false if your table does NOT have created_at and updated_at columns
+   
     public $timestamps = true; 
 
     protected $fillable = [

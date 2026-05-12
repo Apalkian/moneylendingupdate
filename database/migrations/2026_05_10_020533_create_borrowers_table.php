@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('borrower_table', function (Blueprint $table) {
-            $table->id('borrower_id'); // #1 borrower_id
-            $table->string('first_name', 50); // #2
-            $table->string('middle_name', 50)->nullable(); // #3 (Null: Yes)
-            $table->string('last_name', 50); // #4
-            $table->string('contact_number', 20)->nullable(); // #5 (Null: Yes)
+            $table->id('borrower_id'); 
+            $table->string('first_name', 50); 
+            $table->string('middle_name', 50)->nullable(); 
+            $table->string('last_name', 50); 
+            $table->string('contact_number', 20)->nullable(); 
             
-            // Address Split (Matches Image #10)
+            // Address Fields
             $table->string('house_no_bldg')->nullable();
             $table->string('street')->nullable();
             $table->string('barangay');
@@ -26,9 +26,9 @@ return new class extends Migration
             $table->string('province');
             $table->string('zip_code')->nullable();
 
-            $table->date('date_registered'); // #7 date
+            $table->date('date_registered');
             
-            // Foreign Key: admin_id (Matches Image #3)
+            // Foreign Key
             $table->unsignedBigInteger('admin_id')->nullable();
             $table->foreign('admin_id')->references('admin_id')->on('admin_table')->onDelete('set null');
             

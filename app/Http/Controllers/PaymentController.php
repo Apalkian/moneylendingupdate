@@ -6,6 +6,7 @@ use App\Models\Payment;
 use App\Models\Loan;
 use App\Models\AdditionalCapital;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -14,8 +15,17 @@ class PaymentController extends Controller
      */
     public function create()
     {
-        // Only show loans that are still 'Active'
-        $loans = Loan::with('borrower')->where('status', 'Active')->get();
+        // Use the database view to decide what still has an outstanding balance.
+        // This keeps Post Payment dropdown consistent with Dashboard "Outstanding Balances".
+        $loanIds = \DB::table('vw_Outstanding_Balances')
+            ->where('Current_Balance', '>', 0)
+            ->pluck('loan_id')
+            ->all();
+
+        $loans = Loan::with('borrower')
+            ->whereIn('loan_id', $loanIds)
+            ->get();
+
         return view('create_payment', compact('loans'));
     }
 
@@ -24,7 +34,7 @@ class PaymentController extends Controller
      */
     public function store(Request $request) 
     {
-        // 1. Validation: Prevent empty or invalid data
+        // Validation: Prevent empty or invalid data
         $request->validate([
             'loan_id'      => 'required|exists:loan_table,loan_id',
             'amount_paid'  => 'required|numeric|min:0.01',
@@ -33,11 +43,11 @@ class PaymentController extends Controller
 
         $loan = Loan::findOrFail($request->loan_id);
 
-        // 2. Logic: Calculate Interest Added (Trigger: Calculate_Interest_Before_Insert)
-        // Example: calculating 5% of the payment as interest toward the profit
+        // Calculate Interest Added Trigger: Calculate_Interest_Before_Insert
+        
         $interestAmount = $request->amount_paid * ($loan->interest_rate / 100);
 
-        // 3. Save the Payment Record
+        // Save the Payment Record
         Payment::create([
             'loan_id'        => $request->loan_id,
             'payment_date'   => $request->payment_date,
@@ -46,19 +56,41 @@ class PaymentController extends Controller
             'admin_id'       => session('admin_id') ?? 1 // Use logged-in admin or default to 1
         ]);
 
-        // 4. Logic: Auto-Complete Check (Trigger: Generate_Completed_Status_After_Payment)
+        //  Auto-Complete Check Trigger will Generate_Completed_Status_After_Payment
         
-        // Sum of all payments made so far
-        $totalPaid = Payment::where('loan_id', $loan->loan_id)->sum('amount_paid');
-        
-        // Sum of any additional capital/penalties added (from Additional_table)
-        $totalAdditional = AdditionalCapital::where('loan_id', $loan->loan_id)->sum('amount_added');
+        // Sum of all payments made so in this line
+        $totalPaid = (float) Payment::where('loan_id', $loan->loan_id)->sum('amount_paid');
 
-        // Total amount the borrower actually owes
-        $totalDue = $loan->principal_amount + $totalAdditional;
+        $principal = (float) $loan->principal_amount;
+        $rate = (float) $loan->interest_rate;
 
-        if ($totalPaid >= $totalDue) {
-            $loan->update(['status' => 'Completed']);
+        // Total amount the borrower actually owes (principal + interest only)
+        $interestDue = $principal * ($rate / 100);
+        $totalDue = $principal + $interestDue;
+
+        // Epsilon to prevent float/string rounding surprises
+        $epsilon = 0.0001;
+
+        Log::info('PaymentController completion check', [
+            'loan_id' => $loan->loan_id,
+            'principal_amount' => $loan->principal_amount,
+            'interest_rate' => $loan->interest_rate,
+            'interest_due' => $interestDue,
+            'totalDue' => $totalDue,
+            'totalPaid' => $totalPaid,
+        ]);
+
+        $newStatus = ($totalPaid + $epsilon) >= $totalDue ? 'Completed' : 'Active';
+
+        Log::info('PaymentController status update', [
+            'loan_id' => $loan->loan_id,
+            'totalPaid' => $totalPaid,
+            'totalDue' => $totalDue,
+            'newStatus' => $newStatus,
+        ]);
+
+        if ($loan->status !== $newStatus) {
+            $loan->update(['status' => $newStatus]);
         }
 
         return redirect('/')->with('success', 'Payment recorded successfully! Loan status updated.');

@@ -7,66 +7,83 @@ use Illuminate\Http\Request;
 
 class BorrowerController extends Controller
 {
-    public function index()
+    // READ: List all borrowers (with search)
+    public function index(Request $request)
     {
-        // Added pagination or ordering is usually better for long lists
-        $borrowers = Borrower::orderBy('last_name', 'asc')->get();
-        return view('borrowers', compact('borrowers'));
+        $query = Borrower::query();
+
+        if ($request->has('search')) {
+            $query->where('last_name', 'LIKE', '%' . $request->search . '%')
+                  ->orWhere('first_name', 'LIKE', '%' . $request->search . '%');
+        }
+
+        $borrowers = $query->orderBy('last_name', 'asc')->get();
+        return view('borrowers.index', compact('borrowers'));
     }
 
+    // CREATE: Show the form
     public function create()
     {
-        return view('create_borrower');
+        return view('borrowers.create_borrower');
     }
 
+    // CREATE: Save to database
     public function store(Request $request)
     {
-        // Updated Validation to include ALL your split-address fields
         $request->validate([
-            'first_name'        => 'required|string|max:50',
-            'last_name'         => 'required|string|max:50',
-            'contact_number'    => 'nullable|string|max:20',
-            'house_no_bldg'     => 'nullable|string|max:100',
-            'street'            => 'nullable|string|max:100',
-            'barangay'          => 'required|string|max:100',
-            'city_municipality' => 'required|string|max:100',
-            'province'          => 'required|string|max:100',
-            'zip_code'          => 'nullable|string|max:10',
+            'first_name' => 'required',
+            'last_name'  => 'required',
+            'barangay'   => 'required',
+            'city_municipality' => 'required',
+            'province'   => 'required',
             'date_registered'   => 'required|date',
         ]);
 
-        // Saves everything in one go
         Borrower::create($request->all());
 
-        return redirect('/')->with('success', 'Borrower registered successfully!');
+        return redirect('/borrowers')->with('success', 'Borrower added successfully!');
     }
 
-    public function show(Borrower $borrower)
+    // UPDATE: Show the pre-filled form
+    public function edit($id)
     {
-        return view('borrower_details', compact('borrower'));
+        $borrower = Borrower::findOrFail($id);
+        return view('borrowers.edit', compact('borrower'));
     }
 
-    public function edit(Borrower $borrower)
+    // UPDATE: Save changes
+    public function update(Request $request, $id)
     {
-        return view('edit_borrower', compact('borrower'));
-    }
-
-    public function update(Request $request, Borrower $borrower)
-    {
-        // Best practice: Validate before update as well
+        $borrower = Borrower::findOrFail($id);
+        
         $request->validate([
-            'first_name' => 'required|string|max:50',
-            'last_name'  => 'required|string|max:50',
-            'barangay'   => 'required|string',
+            'first_name' => 'required',
+            'middle_name' => 'nullable|string|max:50',
+            'last_name'  => 'required',
+
+            'contact_number' => 'nullable|string|max:20',
+            'date_registered' => 'required|date',
+
+            'house_no_bldg' => 'nullable|string',
+            'street' => 'nullable|string',
+            'zip_code' => 'nullable|string',
+
+            'barangay' => 'required|string',
+            'city_municipality' => 'required|string',
+            'province' => 'required|string',
         ]);
 
         $borrower->update($request->all());
-        return redirect('/')->with('success', 'Borrower updated successfully!');
+
+        return redirect('/borrowers')->with('success', 'Borrower updated successfully!');
     }
 
-    public function destroy(Borrower $borrower)
+    // DELETE: Remove from database
+    public function destroy($id)
     {
+        $borrower = Borrower::findOrFail($id);
         $borrower->delete();
-        return redirect('/')->with('success', 'Borrower deleted successfully!');
+
+        return redirect('/borrowers')->with('success', 'Borrower has been deleted.');
     }
 }
