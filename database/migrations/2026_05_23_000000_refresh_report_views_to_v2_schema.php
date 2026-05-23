@@ -15,7 +15,7 @@ return new class extends Migration
         DB::statement('DROP VIEW IF EXISTS vw_payment_history');
 
         DB::statement(<<<SQL
-            CREATE SQL SECURITY INVOKER VIEW vw_loan_report AS
+            CREATE ALGORITHM=UNDEFINED SQL SECURITY INVOKER VIEW vw_loan_report AS
             SELECT
                 l.id AS loan_id,
                 l.borrower_id,
@@ -47,7 +47,7 @@ return new class extends Migration
         SQL);
 
         DB::statement(<<<SQL
-            CREATE SQL SECURITY INVOKER VIEW vw_outstanding_balances AS
+            CREATE ALGORITHM=UNDEFINED SQL SECURITY INVOKER VIEW vw_outstanding_balances AS
             SELECT
                 l.id AS loan_id,
                 l.borrower_id,
@@ -78,7 +78,7 @@ return new class extends Migration
         SQL);
 
         DB::statement(<<<SQL
-            CREATE SQL SECURITY INVOKER VIEW vw_payment_history AS
+            CREATE ALGORITHM=UNDEFINED SQL SECURITY INVOKER VIEW vw_payment_history AS
             SELECT
                 p.id AS payment_id,
                 p.loan_id,
