@@ -2,60 +2,39 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Loan extends Model
 {
     use HasFactory;
 
-    protected $table = 'loan_table';
-    protected $primaryKey = 'loan_id';
-
-   
-    public $timestamps = true; 
-
+    protected $table = 'loans';
 
     protected $fillable = [
-        'borrower_id', 
-        'principal_amount', 
-        'interest_rate', 
-        'release_date', 
-        'due_date', 
-        'status', 
-        'admin_id'
+        'borrower_id',
+        'principal_amount',
+        'interest_rate',
+        'interest_type',
+        'start_date',
+        'end_date',
+        'status',
     ];
 
-    /**
-     * Relationship: A Loan belongs to a Borrower.
-     * This allows you to do: $loan->borrower->last_name
-     */
-    public function borrower()
+    public function borrower(): BelongsTo
     {
-        return $this->belongsTo(Borrower::class, 'borrower_id', 'borrower_id');
+        return $this->belongsTo(Borrower::class, 'borrower_id');
     }
 
-
-    //Relationship A Loan can have many Payments.
-   
-    public function payments()
+    public function payments(): HasMany
     {
-        return $this->hasMany(Payment::class, 'loan_id', 'loan_id');
+        return $this->hasMany(Payment::class, 'loan_id');
     }
 
-    /**
-     * Relationship: A Loan can have many Additional Capital/Penalty entries.
-     */
-    public function additional_capitals()
+    public function additionalCapitals(): HasMany
     {
-        return $this->hasMany(AdditionalCapital::class, 'loan_id', 'loan_id');
-    }
-
-    /**
-     * Relationship: A Loan is managed by an Admin.
-     */
-    public function admin()
-    {
-        return $this->belongsTo(Admin::class, 'admin_id', 'admin_id');
+        return $this->hasMany(AdditionalCapital::class, 'loan_id');
     }
 }

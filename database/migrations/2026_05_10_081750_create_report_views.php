@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
@@ -12,65 +10,89 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // View Loan Report
-        DB::statement("
-            CREATE OR REPLACE VIEW vw_Loan_Report AS
-            SELECT 
-                l.loan_id, 
-                CONCAT(b.first_name, ' ', b.last_name) AS Borrower_Name, 
-                l.principal_amount AS Principal, 
-                l.interest_rate AS Rate_Percent, 
-                CASE
-                    WHEN
-                        COALESCE((SELECT SUM(amount_paid) FROM payment_table WHERE loan_id = l.loan_id), 0)
-                        >= (l.principal_amount + (l.principal_amount * (l.interest_rate / 100)))
-                    THEN 'Completed'
-                    ELSE 'Active'
-                END AS Loan_Status,
-                l.release_date,
-                DATE_ADD(l.release_date, INTERVAL 1 MONTH) AS due_date,
-                
-                -- Rounded to 2 decimal places
-                ROUND((l.principal_amount + (l.principal_amount * (l.interest_rate / 100))), 2) AS total_to_pay
-            FROM loan_table l
-            JOIN borrower_table b ON l.borrower_id = b.borrower_id
-        ");
+        DB::statement('DROP VIEW IF EXISTS vw_Loan_Report');
+        DB::statement('DROP VIEW IF EXISTS vw_Payment_History');
+        DB::statement('DROP VIEW IF EXISTS vw_Outstanding_Balances');
 
-        // View Payment History
-        DB::statement("
-            CREATE OR REPLACE VIEW vw_Payment_History AS
-            SELECT 
-                p.payment_date, 
-                CONCAT(b.first_name, ' ', b.last_name) AS Borrower, 
-                p.amount_paid, 
-                p.interest_added, 
-                a.username AS Admin_Processor
-            FROM payment_table p
-            JOIN loan_table l ON p.loan_id = l.loan_id
-            JOIN borrower_table b ON l.borrower_id = b.borrower_id
-            JOIN admin_table a ON p.admin_id = a.admin_id
-        ");
-
-        // View Outstanding Balances
-        DB::statement("
-            CREATE OR REPLACE VIEW vw_Outstanding_Balances AS
-            SELECT 
-                l.loan_id, 
-                CONCAT(b.first_name, ' ', b.last_name) AS Borrower,
-                ROUND(
+        DB::statement(<<<SQL
+            CREATE VIEW vw_Loan_Report AS
+            SELECT
+                l.id AS loan_id,
+                l.borrower_id,
+                COALESCE(u.name, CONCAT('Borrower #', b.id)) AS borrower_name,
+                l.principal_amount,
+                l.interest_rate,
+                l.interest_type,
+                l.start_date,
+                l.end_date,
+                l.status,
+                (
                     (l.principal_amount + (l.principal_amount * (l.interest_rate / 100)))
-                    - COALESCE((SELECT SUM(amount_paid) FROM payment_table WHERE loan_id = l.loan_id), 0), 
-                2) AS Current_Balance,
-                CASE
-                    WHEN COALESCE((SELECT SUM(amount_paid) FROM payment_table WHERE loan_id = l.loan_id), 0)
-                         >= (l.principal_amount + (l.principal_amount * (l.interest_rate / 100)))
-                    THEN 'Completed'
-                    ELSE 'Active'
-                END AS status
-            FROM loan_table l
-            JOIN borrower_table b ON l.borrower_id = b.borrower_id
-            HAVING Current_Balance > 0
-        ");
+                    + COALESCE(ac.total_additional, 0)
+                    - COALESCE(p.total_paid, 0)
+                ) AS outstanding_balance
+            FROM loans l
+            INNER JOIN borrowers b ON b.id = l.borrower_id
+            LEFT JOIN users u ON u.id = b.user_id
+            LEFT JOIN (
+                SELECT loan_id, SUM(amount_paid) AS total_paid
+                FROM payments
+                GROUP BY loan_id
+            ) p ON p.loan_id = l.id
+            LEFT JOIN (
+                SELECT loan_id, SUM(amount_added) AS total_additional
+                FROM additional_table
+                GROUP BY loan_id
+            ) ac ON ac.loan_id = l.id
+        SQL);
+
+        DB::statement(<<<SQL
+            CREATE VIEW vw_Payment_History AS
+            SELECT
+                p.id AS payment_id,
+                p.loan_id,
+                p.payment_date,
+                p.amount_paid,
+                p.transaction_reference,
+                p.notes,
+                l.borrower_id,
+                COALESCE(u.name, CONCAT('Borrower #', b.id)) AS borrower_name
+            FROM payments p
+            INNER JOIN loans l ON l.id = p.loan_id
+            INNER JOIN borrowers b ON b.id = l.borrower_id
+            LEFT JOIN users u ON u.id = b.user_id
+        SQL);
+
+        DB::statement(<<<SQL
+            CREATE VIEW vw_Outstanding_Balances AS
+            SELECT
+                l.id AS loan_id,
+                l.borrower_id,
+                COALESCE(u.name, CONCAT('Borrower #', b.id)) AS borrower_name,
+                l.end_date AS due_date,
+                (l.principal_amount + (l.principal_amount * (l.interest_rate / 100))) AS base_total_due,
+                COALESCE(ac.total_additional, 0) AS total_additional_payment,
+                COALESCE(p.total_paid, 0) AS total_paid,
+                (
+                    (l.principal_amount + (l.principal_amount * (l.interest_rate / 100)))
+                    + COALESCE(ac.total_additional, 0)
+                    - COALESCE(p.total_paid, 0)
+                ) AS outstanding_balance,
+                l.status
+            FROM loans l
+            INNER JOIN borrowers b ON b.id = l.borrower_id
+            LEFT JOIN users u ON u.id = b.user_id
+            LEFT JOIN (
+                SELECT loan_id, SUM(amount_paid) AS total_paid
+                FROM payments
+                GROUP BY loan_id
+            ) p ON p.loan_id = l.id
+            LEFT JOIN (
+                SELECT loan_id, SUM(amount_added) AS total_additional
+                FROM additional_table
+                GROUP BY loan_id
+            ) ac ON ac.loan_id = l.id
+        SQL);
     }
 
     /**
@@ -78,8 +100,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("DROP VIEW IF EXISTS vw_Outstanding_Balances");
-        DB::statement("DROP VIEW IF EXISTS vw_Payment_History");
-        DB::statement("DROP VIEW IF EXISTS vw_Loan_Report");
+        DB::statement('DROP VIEW IF EXISTS vw_Outstanding_Balances');
+        DB::statement('DROP VIEW IF EXISTS vw_Payment_History');
+        DB::statement('DROP VIEW IF EXISTS vw_Loan_Report');
     }
 };
+

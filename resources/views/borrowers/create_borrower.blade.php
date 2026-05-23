@@ -11,72 +11,44 @@
             <div class="card-body">
                 <form action="/borrowers" method="POST">
                     @csrf
-                    
+
                     <!-- 1. Personal Information -->
-                    <h6 class="text-success fw-bold mb-3">Personal Information</h6>
+                    <h6 class="text-success fw-bold mb-3">Borrower Account</h6>
                     <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">First Name</label>
-                            <input type="text" name="first_name" class="form-control @error('first_name') is-invalid @enderror" value="{{ old('first_name') }}" required>
-                            @error('first_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required>
+                            @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Middle Name</label>
-                            <input type="text" name="middle_name" class="form-control" value="{{ old('middle_name') }}">
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Last Name</label>
-                            <input type="text" name="last_name" class="form-control @error('last_name') is-invalid @enderror" value="{{ old('last_name') }}" required>
-                            @error('last_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
+                            @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Contact Number</label>
-                            <input type="text" name="contact_number" class="form-control" value="{{ old('contact_number') }}" placeholder="09xxxxxxxxx">
+                            <input type="text" name="phone_number" class="form-control" value="{{ old('phone_number') }}" placeholder="09xxxxxxxxx">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Date Registered</label>
-                            <input type="date" name="date_registered" class="form-control" value="{{ old('date_registered', date('Y-m-d')) }}" required>
+                            <label class="form-label">Credit Status</label>
+                            <select name="credit_status" class="form-select @error('credit_status') is-invalid @enderror" required>
+                                <option value="good" {{ old('credit_status') === 'good' ? 'selected' : '' }}>Good</option>
+                                <option value="delinquent" {{ old('credit_status') === 'delinquent' ? 'selected' : '' }}>Delinquent</option>
+                            </select>
+                            @error('credit_status') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                     </div>
 
                     <hr>
 
-                    <!-- 2. Address Details (Matches your Image #10) -->
-                    <h6 class="text-success fw-bold mb-3">Address Details</h6>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">House No. / Bldg</label>
-                            <input type="text" name="house_no_bldg" class="form-control" value="{{ old('house_no_bldg') }}">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Street</label>
-                            <input type="text" name="street" class="form-control" value="{{ old('street') }}">
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">Barangay</label>
-                            <input type="text" name="barangay" class="form-control @error('barangay') is-invalid @enderror" value="{{ old('barangay') }}" required>
-                            @error('barangay') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">City/Municipality</label>
-                            <input type="text" name="city_municipality" class="form-control @error('city_municipality') is-invalid @enderror" value="{{ old('city_municipality') }}" required>
-                            @error('city_municipality') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">Province</label>
-                            <input type="text" name="province" class="form-control @error('province') is-invalid @enderror" value="{{ old('province') }}" required>
-                            @error('province') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">Zip Code</label>
-                            <input type="text" name="zip_code" class="form-control" value="{{ old('zip_code') }}">
-                        </div>
+                    <h6 class="text-success fw-bold mb-3">Address</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Complete Address</label>
+                        <textarea name="address" rows="3" class="form-control @error('address') is-invalid @enderror" placeholder="House/Street/Barangay/City/Province">{{ old('address') }}</textarea>
+                        @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="mt-4 d-grid gap-2 d-md-flex justify-content-md-end">

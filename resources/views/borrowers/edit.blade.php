@@ -2,67 +2,41 @@
 
 @section('content')
 <div class="card shadow">
-    <div class="card-header bg-warning">Edit Borrower: {{ $borrower->first_name }}</div>
+    <div class="card-header bg-warning">Edit Borrower: {{ $borrower->user->name ?? 'Borrower' }}</div>
     <div class="card-body">
-        <form action="/borrowers/{{ $borrower->borrower_id }}" method="POST">
+        <form action="/borrowers/{{ $borrower->id }}" method="POST">
             @csrf
-            @method('PUT') 
-            
+            @method('PUT')
+
             <div class="row mb-3">
-                <div class="col-md-4">
-                    <label>First Name</label>
-                    <input type="text" name="first_name" class="form-control" value="{{ $borrower->first_name }}" required>
+                <div class="col-md-6">
+                    <label>Full Name</label>
+                    <input type="text" name="name" class="form-control" value="{{ old('name', $borrower->user->name ?? '') }}" required>
                 </div>
-                <div class="col-md-4">
-                    <label>Middle Name</label>
-                    <input type="text" name="middle_name" class="form-control" value="{{ $borrower->middle_name }}">
-                </div>
-                <div class="col-md-4">
-                    <label>Last Name</label>
-                    <input type="text" name="last_name" class="form-control" value="{{ $borrower->last_name }}" required>
+                <div class="col-md-6">
+                    <label>Email</label>
+                    <input type="email" name="email" class="form-control" value="{{ old('email', $borrower->user->email ?? '') }}" required>
                 </div>
             </div>
 
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label>Contact</label>
-                    <input type="text" name="contact_number" class="form-control" value="{{ $borrower->contact_number }}">
+                    <input type="text" name="phone_number" class="form-control" value="{{ old('phone_number', $borrower->phone_number) }}">
                 </div>
                 <div class="col-md-6">
-                    <label>Date Registered</label>
-                    <input type="date" name="date_registered" class="form-control" value="{{ $borrower->date_registered ?? '' }}" required>
+                    <label>Credit Status</label>
+                    <select name="credit_status" class="form-select" required>
+                        <option value="good" {{ old('credit_status', $borrower->credit_status) === 'good' ? 'selected' : '' }}>Good</option>
+                        <option value="delinquent" {{ old('credit_status', $borrower->credit_status) === 'delinquent' ? 'selected' : '' }}>Delinquent</option>
+                    </select>
                 </div>
             </div>
 
             <h5 class="mt-4">Update Address</h5>
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label>House No. / Bldg</label>
-                    <input type="text" name="house_no_bldg" class="form-control" value="{{ $borrower->house_no_bldg }}">
-                </div>
-                <div class="col-md-4">
-                    <label>Street</label>
-                    <input type="text" name="street" class="form-control" value="{{ $borrower->street }}">
-                </div>
-                <div class="col-md-4">
-                    <label>Zip Code</label>
-                    <input type="text" name="zip_code" class="form-control" value="{{ $borrower->zip_code }}">
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label>Barangay</label>
-                    <input type="text" name="barangay" class="form-control" value="{{ $borrower->barangay }}" required>
-                </div>
-                <div class="col-md-4">
-                    <label>City</label>
-                    <input type="text" name="city_municipality" class="form-control" value="{{ $borrower->city_municipality }}" required>
-                </div>
-                <div class="col-md-4">
-                    <label>Province</label>
-                    <input type="text" name="province" class="form-control" value="{{ $borrower->province }}" required>
-                </div>
+            <div class="mb-3">
+                <label>Address</label>
+                <textarea name="address" rows="3" class="form-control">{{ old('address', $borrower->address) }}</textarea>
             </div>
 
             <button type="submit" class="btn btn-primary">Update Borrower Details</button>

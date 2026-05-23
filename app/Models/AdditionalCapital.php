@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AdditionalCapital extends Model
 {
@@ -12,21 +13,21 @@ class AdditionalCapital extends Model
     protected $table = 'additional_table';
     protected $primaryKey = 'capital_id';
 
-   
-    public $timestamps = true; 
+
+    public $timestamps = true;
 
     protected $fillable = [
-        'loan_id', 
-        'amount_added', 
-        'date_added', 
+        'loan_id',
+        'amount_added',
+        'date_added',
         'remarks'
     ];
 
     /**
      * Relationship: An Additional Capital entry belongs to a Loan.
      */
-    public function loan()
+    public function loan(): BelongsTo
     {
-        return $this->belongsTo(Loan::class, 'loan_id', 'loan_id');
+        return $this->belongsTo(Loan::class, 'loan_id', 'id');
     }
 }

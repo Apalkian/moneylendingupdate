@@ -18,8 +18,8 @@
                         <select name="borrower_id" class="form-select @error('borrower_id') is-invalid @enderror" required>
                             <option value="">-- Choose Borrower --</option>
                             @foreach($borrowers as $b)
-                                <option value="{{ $b->borrower_id }}" {{ old('borrower_id') == $b->borrower_id ? 'selected' : '' }}>
-                                    {{ $b->last_name }}, {{ $b->first_name }}
+                                <option value="{{ $b->id }}" {{ old('borrower_id') == $b->id ? 'selected' : '' }}>
+                                    {{ $b->user->name ?? ('Borrower #'.$b->id) }}
                                 </option>
                             @endforeach
                         </select>
@@ -65,7 +65,7 @@
                     <!-- Total (Principal + Interest) -->
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Total Payable Amount</label>
+                            <label class="form-label fw-bold">Total Amount</label>
                             <input
                                 id="total_principal_interest"
                                 type="text"
@@ -96,12 +96,12 @@
                         <!-- 5. Due Date (Automatically calculated and shown) -->
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Due Date</label>
-                            <input 
-                                type="date" 
-                                name="due_date" 
-                                id="due_date" 
-                                class="form-control bg-light" 
-                                readonly 
+                            <input
+                                type="date"
+                                name="due_date"
+                                id="due_date"
+                                class="form-control bg-light"
+                                readonly
                                 required>
                         </div>
                     </div>
@@ -145,12 +145,12 @@
             let date = new Date(releaseDate.value);
             // Add exactly one month
             date.setMonth(date.getMonth() + 1);
-            
+
             // Format to YYYY-MM-DD so the date input can read it
             let y = date.getFullYear();
             let m = ("0" + (date.getMonth() + 1)).slice(-2);
             let d = ("0" + date.getDate()).slice(-2);
-            
+
             dueDate.value = `${y}-${m}-${d}`;
         }
     }

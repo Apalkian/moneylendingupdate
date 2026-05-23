@@ -15,27 +15,31 @@
     <thead class="table-dark">
         <tr>
             <th>Name</th>
+            <th>Email</th>
             <th>Contact</th>
             <th>Address</th>
+            <th>Status</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         @foreach($borrowers as $b)
         <tr>
-            <td>{{ $b->last_name }}, {{ $b->first_name }} {{ $b->middle_name }}</td>
-            <td>{{ $b->contact_number }}</td>
+            <td>{{ $b->user->name ?? 'N/A' }}</td>
+            <td>{{ $b->user->email ?? 'N/A' }}</td>
+            <td>{{ $b->phone_number ?? '-' }}</td>
+            <td>{{ $b->address ?? '-' }}</td>
             <td>
-                {{ $b->house_no_bldg }} {{ $b->street }}<br>
-                {{ $b->barangay }}, {{ $b->city_municipality }}<br>
-                {{ $b->province }} {{ $b->zip_code }}
+                <span class="badge {{ $b->credit_status === 'delinquent' ? 'bg-danger' : 'bg-success' }}">
+                    {{ ucfirst($b->credit_status ?? 'good') }}
+                </span>
             </td>
             <td>
                 <!-- Edit Button -->
-                <a href="/borrowers/{{ $b->borrower_id }}/edit" class="btn btn-sm btn-warning">Edit</a>
+                <a href="/borrowers/{{ $b->id }}/edit" class="btn btn-sm btn-warning">Edit</a>
 
                 <!-- Delete Button (Requires a small form) -->
-                <form action="/borrowers/{{ $b->borrower_id }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this borrower?')">
+                <form action="/borrowers/{{ $b->id }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this borrower?')">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-sm btn-danger">Delete</button>

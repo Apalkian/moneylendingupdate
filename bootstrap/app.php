@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // REGISTER YOUR CUSTOM MIDDLEWARE ALIAS HERE
         $middleware->alias([
             'admin.auth' => \App\Http\Middleware\AdminAuth::class,
+            'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

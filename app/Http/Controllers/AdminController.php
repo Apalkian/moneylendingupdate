@@ -23,14 +23,15 @@ class AdminController extends Controller
             'password' => 'required',
         ]);
 
-        $admin = Admin::where('username', $request->username)->first();
+        $admin = Admin::query()->where('username', '=', $request->input('username'), 'and')->first();
 
         // Check if Admin exists and password matches (using Hash check)
-        if ($admin && Hash::check($request->password, $admin->password)) {
+        // @intelephense-ignore-next-line
+        if ($admin && app('hash')->check((string) $request->input('password'), (string) $admin->password, [])) {
             // Store admin in session
             Session::put('admin_id', $admin->admin_id);
             Session::put('admin_name', $admin->first_name);
-            
+
             return redirect('/')->with('success', 'Welcome back, ' . $admin->first_name . '!');
         }
 
@@ -40,7 +41,7 @@ class AdminController extends Controller
     // Show Register Form (To create new staff/admin)
     public function create()
     {
-        return view('admin.register');
+        //return view('admin.register');
     }
 
     // Store a new Admin
@@ -54,11 +55,11 @@ class AdminController extends Controller
         ]);
 
         Admin::create([
-            'username' => $request->username,
-            'password' => Hash::make($request->password), // SECURE: Hashing the password
-            'first_name' => $request->first_name,
-            'middle_name' => $request->middle_name,
-            'last_name' => $request->last_name,
+            'username' => $request->input('username'),
+            'password' => Hash::make($request->input('password')), // SECURE: Hashing the password
+            'first_name' => $request->input('first_name'),
+            'middle_name' => $request->input('middle_name'),
+            'last_name' => $request->input('last_name'),
         ]);
 
         return redirect('/login')->with('success', 'Admin account created! Please log in.');

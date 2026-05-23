@@ -11,34 +11,26 @@
             <div class="card-body">
                 <form action="/payments" method="POST">
                     @csrf
-                    
+
                     <!-- 1. Select Loan -->
                     <div class="mb-3">
                         <label class="form-label fw-bold">Select Active Loan</label>
                         <select name="loan_id" class="form-select" required>
                             <option value="" selected disabled>-- Choose a Loan --</option>
                             @foreach($loans as $loan)
-                                @php
-                                    $principal = (float) $loan->principal_amount;
-                                    $interestDue = $principal * ((float) $loan->interest_rate / 100);
-                                    $totalPrincipalInterest = $principal + $interestDue;
-
-                                    $totalPaid = (float) \App\Models\Payment::where('loan_id', $loan->loan_id)->sum('amount_paid');
-                                    $remainingTotal = $totalPrincipalInterest - $totalPaid;
-                                    if ($remainingTotal < 0) { $remainingTotal = 0; }
-                                @endphp
+                                @php $remainingTotal = (float) ($loan->computed_outstanding ?? 0); @endphp
                                 <option
-                                    value="{{ $loan->loan_id }}"
-                                    data-due-date="{{ $loan->due_date }}"
+                                    value="{{ $loan->id }}"
+                                    data-due-date="{{ $loan->end_date }}"
                                     data-total-to-pay="{{ number_format($remainingTotal, 2, '.', '') }}">
-                                    ID: {{ $loan->loan_id }} |
-                                    Borrower: {{ $loan->borrower->last_name }}, {{ $loan->borrower->first_name }} |
-                                    Due: {{ $loan->due_date }} |
+                                    ID: {{ $loan->id }} |
+                                    Borrower: {{ $loan->borrower->user->name ?? ('Borrower #'.$loan->borrower_id) }} |
+                                    Due: {{ $loan->end_date }} |
                                     Total to Pay: PHP {{ number_format($remainingTotal, 2) }}
                                 </option>
                             @endforeach
                         </select>
-                        <div class="form-text text-muted">Only loans with "Active" status are shown here.</div>
+                        <div class="form-text text-muted"></div>
 
                         <div class="mt-3">
                             <label class="form-label fw-bold">Due Date (Monthly)</label>
@@ -66,6 +58,11 @@
                         </div>
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Notes</label>
+                        <textarea name="notes" class="form-control" rows="3" placeholder="Optional note for this payment...">{{ old('notes') }}</textarea>
+                    </div>
+
                     <hr>
 
                     <!-- Submit Buttons -->
@@ -76,8 +73,8 @@
                 </form>
             </div>
         </div>
-        
-       
+
+
 
 <script>
 (function () {

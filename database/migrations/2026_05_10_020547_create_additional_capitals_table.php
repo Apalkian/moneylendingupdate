@@ -11,16 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('additional_table')) {
+            return;
+        }
+
         Schema::create('additional_table', function (Blueprint $table) {
-            $table->id('capital_id'); 
+            $table->id('capital_id');
             $table->unsignedBigInteger('loan_id');
-            $table->decimal('amount_added', 15, 2); 
-            $table->date('date_added'); 
-            $table->text('remarks')->nullable(); 
-            
-            // Foreign Key Relationship
-            $table->foreign('loan_id')->references('loan_id')->on('loan_table')->onDelete('cascade');
-            
+            $table->decimal('amount_added', 15, 2);
+            $table->date('date_added');
+            $table->text('remarks')->nullable();
+
             $table->timestamps();
         });
     }
@@ -30,7 +31,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        
+
         Schema::dropIfExists('additional_table');
     }
 };
