@@ -20,9 +20,7 @@
                                 {{ __('Welcome back, :name', ['name' => auth()->user()->name]) }}
                             </h3>
 
-                            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
-                                {{ __('You are logged in and your workspace is ready. Use the actions below to continue managing lending operations.') }}
-                            </p>
+
                         </div>
 
                         <div class="rounded-2xl border border-fuchsia-400/40 bg-fuchsia-500/10 px-4 py-3 text-sm text-fuchsia-100 backdrop-blur">
